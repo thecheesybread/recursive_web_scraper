@@ -10,10 +10,11 @@ import random
 
 
 def set_up_globals():
-    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short, error_collection
+    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short, error_collection, backup_interval
     
     random_wait = True
-    wait_time = 2
+    wait_time = 1
+    backup_interval = 10
 
     """Determines which urls to scrape through storing previous entries in database"""
     url_to_scrape = sys.argv[1]
@@ -71,7 +72,7 @@ def begin_get(url_queue, explored_set, current_counter):
     save_counter = 0
     while not url_queue.empty():
         save_counter += 1
-        if save_counter > 5:
+        if save_counter > backup_interval:
             current_counter = save_entry(explored_set, url_queue, current_counter)
             save_counter = 0
         url = url_queue.get()
@@ -90,10 +91,16 @@ def begin_get(url_queue, explored_set, current_counter):
         if account_for_last_slash and account_for_last_slash.group(0) == url:
             url = account_for_last_slash.group(1)
         ensure_path(url)
-        f = open(url + '_file', 'w')
-        f.write(html)
-        f.close()
-        random_wait = random.randint(0, 100)/30.0
+
+        try: 
+            f = open(url + '_file', 'w')
+            f.write(html)
+            f.close()
+        except:
+            error_entry = {'url' : url, 'error' :  'cannot find path even though path ensured'}
+            error_collection.insert(error_entry)
+            continue
+        random_wait = random.randint(0, 70)/30.0
         time.sleep(wait_time + random_wait)
         
         """Finds new urls"""
