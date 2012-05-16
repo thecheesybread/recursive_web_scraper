@@ -10,7 +10,7 @@ import random
 
 
 def set_up_globals():
-    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short
+    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short, error_collection
     
     random_wait = True
     wait_time = 2
@@ -21,6 +21,7 @@ def set_up_globals():
     connection = Connection('localhost', 27017)
     db = connection.get_html
     url_collection = db[url_to_scrape]
+    error_collection = db['errors']
     
     cookie_handler = urllib2.HTTPCookieProcessor()
     url_opener = urllib2.build_opener(MyHTTPRedirectHandler, cookie_handler)
@@ -36,10 +37,9 @@ def scrape_html():
         url_queue.put(url_to_scrape)
         begin_get(url_queue, explored_set, 0)
         return
-
     current_entry = all_entries[0]
     current_counter = current_entry['counter']
-
+    print 'Working on ' + str(current_counter * 5) + ' entry'
     url_array = current_entry['url_array']
     url_queue = Queue()
     for x in url_array:
@@ -71,12 +71,17 @@ def begin_get(url_queue, explored_set, current_counter):
     save_counter = 0
     while not url_queue.empty():
         save_counter += 1
-        if save_counter > 50:
+        if save_counter > 5:
             current_counter = save_entry(explored_set, url_queue, current_counter)
             save_counter = 0
         url = url_queue.get()
         print 'Working on ' + url
-        page = url_opener.open(url)
+        try :
+            page = url_opener.open(url)
+        except:
+            error_entry = {'url' : url}
+            error_collection.insert(error_entry)
+            continue
         html = page.read()
         if not url_short in url:
             continue
@@ -112,10 +117,10 @@ def save_entry(explored_set, url_queue, counter):
         explored_array.append(x)
 
     url_array = []
-    while not current_queue.empty():
-        url_array.append(current_queue.get())
+    while not url_queue.empty():
+        url_array.append(url_queue.get())
     for x in url_array:
-        current_queue.put(x)
+        url_queue.put(x)
         
     new_entry = {'counter' : counter, 'url_array' : url_array, 'explored_array' : explored_array}
     url_collection.insert(new_entry)
