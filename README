@@ -1,6 +1,10 @@
-Recursive scraper to download a site specifying contents
+NO MOAR WGET
+Recursive scraper to download an entire site
+
+Example:
+python get_html.py http://www.reddit.com
 
 Note:
-Uses MongoDB and PyMongo.
-
-NO MOAR WGET
+You need to download MongoDB and PyMongo to use
+The script stores state of where you are in your process, so if you stop the script you can begin where you stopped
+Only works for absolute paths

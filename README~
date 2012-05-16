@@ -2,3 +2,5 @@ Recursive scraper to download a site specifying contents
 
 Note:
 Uses MongoDB and PyMongo.
+
+NO MOAR WGET
