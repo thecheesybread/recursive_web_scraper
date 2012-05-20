@@ -10,10 +10,11 @@ import random
 
 
 def set_up_globals():
-    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short, error_collection
+    global random_wait, wait_time, url_to_scrape, connection, db, url_collection, cookie_handler, url_opener, url_short, error_collection, backup_interval
     
     random_wait = True
     wait_time = 1
+    backup_interval = 10
 
     """Determines which urls to scrape through storing previous entries in database"""
     url_to_scrape = sys.argv[1]
@@ -71,7 +72,7 @@ def begin_get(url_queue, explored_set, current_counter):
     save_counter = 0
     while not url_queue.empty():
         save_counter += 1
-        if save_counter > 5:
+        if save_counter > backup_interval:
             current_counter = save_entry(explored_set, url_queue, current_counter)
             save_counter = 0
         url = url_queue.get()

@@ -19,7 +19,7 @@ def set_up_globals():
     """Determines which urls to scrape through storing previous entries in database"""
     url_to_scrape = sys.argv[1]
     url_short = url_to_scrape.replace('http://', '')
-    connection = Connection('localhost', 27017)
+    connection = Connection('localhost', 27018)
     db = connection.get_html
     url_collection = db[url_to_scrape]
     error_collection = db['errors']
